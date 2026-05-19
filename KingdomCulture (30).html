@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>KingdomCulture.</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Inter',sans-serif;background:#0A0A0A;color:#F0F0F0;overflow-x:hidden;}
+.page{display:none;padding:44px 16px 120px;-webkit-overflow-scrolling:touch;}
+.page.active{display:block;}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#0A0A0A;border-top:1px solid rgba(201,168,76,0.3);display:flex;padding:8px 0 20px;z-index:100;}
+.nav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:rgba(255,255,255,0.4);font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;padding:4px 0;}
+.nav a.active{color:#C9A84C;}
+.nav a svg{width:22px;height:22px;}
+.card{background:#141414;border-radius:12px;margin:16px 0;border:1px solid rgba(201,168,76,0.12);}
+.card-row{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px;}
+.card-row:last-child{border-bottom:none;}
+.sec{font-size:11px;font-weight:600;color:#C9A84C;text-transform:uppercase;letter-spacing:1.5px;margin:24px 0 8px;}
+.btn{display:block;width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;text-align:center;text-decoration:none;}
+.btn-gold{background:#C9A84C;color:#000;}
+.btn-outline{background:transparent;color:#C9A84C;border:1px solid #C9A84C;}
+.btn-dark{background:#111;color:#fff;}
+input,textarea{display:block;width:100%;background:#1a1a1a;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:12px;font-size:14px;color:#F0F0F0;font-family:inherit;outline:none;margin-bottom:10px;}
+textarea{resize:none;}
+.post{background:#141414;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.07);}
+.avatar{width:32px;height:32px;border-radius:50%;background:rgba(201,168,76,0.2);color:#C9A84C;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:4px;}
+.cat-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.2);background:transparent;color:rgba(255,255,255,0.5);font-family:inherit;margin-right:6px;margin-bottom:8px;}
+.cat-btn.active{border-color:#C9A84C;background:rgba(201,168,76,0.15);color:#C9A84C;}
+.hero{background:#000;padding:36px 20px 24px;text-align:center;margin:-60px -16px 0;}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <img src="https://kingdomcultureapp.github.io/wordmark.jpg" style="width:240px;display:block;margin:0 auto 14px;">
+    <p style="color:rgba(255,255,255,0.45);font-size:13px;margin-bottom:20px;">We are a ministry with a desire to love God and love people.</p>
+    <a href="https://www.facebook.com/share/186MNBCFBM/?mibextid=wwXIfr" target="_blank" class="btn btn-outline" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A84C"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+      Find Us on Facebook
+    </a>
+  </div>
+
+  <p class="sec">Quick Access</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+    <div class="card" style="margin:0;padding:16px;cursor:pointer;" onclick="showPage('events')">
+      <div style="font-size:26px;margin-bottom:8px;">📅</div>
+      <p style="font-size:14px;font-weight:600;">Latest Events</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);">What's coming up</p>
+    </div>
+    <div class="card" style="margin:0;padding:16px;cursor:pointer;" onclick="showPage('more')">
+      <div style="font-size:26px;margin-bottom:8px;">🕊️</div>
+      <p style="font-size:14px;font-weight:600;">Service Times</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);">Sun, Wed & more</p>
+    </div>
+    <div class="card" style="margin:0;padding:16px;grid-column:1/-1;">
+      <div style="display:flex;gap:10px;margin-bottom:10px;">
+        <a href="https://www.facebook.com/share/186MNBCFBM/?mibextid=wwXIfr" target="_blank" style="width:36px;height:36px;border-radius:10px;background:#1877F2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        </a>
+        <a href="https://www.tiktok.com/@kingdom.culture.ministry" target="_blank" style="width:36px;height:36px;border-radius:10px;background:#000;border:1px solid #333;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.77.01 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-6.13 6.33 6.34 6.34 0 0 0 12.67 0V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z"/></svg>
+        </a>
+        <a href="https://www.instagram.com/kingdomculture.ministries" target="_blank" style="width:36px;height:36px;border-radius:10px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37zM17.5 6.5h.01M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z"/></svg>
+        </a>
+      </div>
+      <p style="font-size:14px;font-weight:600;">Follow KingdomCulture.</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);">Stay connected with us</p>
+    </div>
+  </div>
+
+  <p class="sec">Sermons</p>
+  <a href="https://www.facebook.com/share/186MNBCFBM/?mibextid=wwXIfr" target="_blank" class="card" style="padding:16px;display:flex;align-items:center;gap:14px;text-decoration:none;">
+    <div style="width:44px;height:44px;border-radius:12px;background:#1877F2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+    </div>
+    <div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#FF3B30;"></div>
+        <span style="font-size:12px;font-weight:700;color:#FF3B30;">WATCH LIVE</span>
+      </div>
+      <p style="font-size:15px;font-weight:600;color:#F0F0F0;margin-bottom:2px;">KingdomCulture. on Facebook</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);">Tap to join when we're live</p>
+    </div>
+  </a>
+
+  <p class="sec" style="display:flex;justify-content:space-between;align-items:center;padding-right:16px;">
+    <span>Message Library</span>
+    <span onclick="showPage('sermons')" style="font-size:11px;color:#C9A84C;cursor:pointer;font-weight:600;">View All →</span>
+  </p>
+
+  <div id="home-sermons">
+  <!-- Senior Sunday Service Card -->
+  <div class="card" style="overflow:hidden;margin-bottom:16px;">
+    <!-- Service header -->
+    <div style="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px;">
+      <div style="width:42px;height:42px;border-radius:10px;overflow:hidden;flex-shrink:0;">
+        <img src="https://kingdomcultureapp.github.io/senior-sunday-1.jpg" style="width:100%;height:100%;object-fit:cover;">
+      </div>
+      <div>
+        <p style="font-size:16px;font-weight:700;margin-bottom:2px;">Senior Sunday</p>
+        <p style="font-size:12px;color:rgba(255,255,255,0.4);">May 18, 2026 · KingdomCulture.</p>
+      </div>
+    </div>
+
+    <!-- Video -->
+    <a href="https://www.facebook.com/share/v/18YtNhncZJ/?mibextid=wwXIfr" target="_blank" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.07);text-decoration:none;">
+      <div style="position:relative;width:80px;height:54px;border-radius:8px;overflow:hidden;flex-shrink:0;">
+        <img src="https://kingdomcultureapp.github.io/senior-sunday-1.jpg" style="width:100%;height:100%;object-fit:cover;">
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;">
+          <div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,0.9);display:flex;align-items:center;justify-content:center;">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="#000"><path d="M5 3l14 9-14 9V3z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:14px;font-weight:600;color:#F0F0F0;margin-bottom:2px;">Watch Service</p>
+        <p style="font-size:11px;color:#C9A84C;">Facebook Video →</p>
+      </div>
+    </a>
+
+    <!-- Photos row -->
+    <div style="padding:12px 16px;">
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Photos from this service</p>
+      <div id="senior-photos" style="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;">
+        <div onclick="openServicePhoto('ss1')" style="flex-shrink:0;width:90px;height:90px;border-radius:10px;overflow:hidden;cursor:pointer;">
+          <img src="https://kingdomcultureapp.github.io/senior-sunday-1.jpg" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div onclick="openServicePhoto('ss2')" style="flex-shrink:0;width:90px;height:90px;border-radius:10px;overflow:hidden;cursor:pointer;">
+          <img src="https://kingdomcultureapp.github.io/senior-sunday-2.jpg" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div onclick="openServicePhoto('ss3')" style="flex-shrink:0;width:90px;height:90px;border-radius:10px;overflow:hidden;cursor:pointer;">
+          <img src="https://kingdomcultureapp.github.io/senior-sunday-3.jpg" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div onclick="openServicePhoto('ss4')" style="flex-shrink:0;width:90px;height:90px;border-radius:10px;overflow:hidden;cursor:pointer;">
+          <img src="https://kingdomcultureapp.github.io/senior-sunday-4.jpg" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div onclick="openServicePhoto('ss5')" style="flex-shrink:0;width:90px;height:90px;border-radius:10px;overflow:hidden;cursor:pointer;">
+          <img src="https://kingdomcultureapp.github.io/senior-sunday-5.jpg" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- Photo fullscreen overlay -->
+  <div id="service-photo-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;">
+    <button onclick="closeServicePhoto()" style="position:absolute;top:20px;left:20px;background:none;border:none;color:#C9A84C;font-size:17px;cursor:pointer;font-family:inherit;">&#8592; Back</button>
+    <img id="service-photo-img" style="max-width:95%;max-height:85vh;border-radius:12px;object-fit:contain;">
+  </div>
+
+  <p class="sec">Next Event</p>
+  <div class="card" style="padding:16px;display:flex;gap:14px;align-items:center;cursor:pointer;" onclick="showPage('events')">
+    <img src="https://kingdomcultureapp.github.io/senior-sunday-4.jpg" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;">
+    <div style="flex:1;min-width:0;">
+      <p style="font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">SET APART - KCM YTH Summer Conference</p>
+      <p style="font-size:13px;color:rgba(255,255,255,0.4);">July 6-8 · Lamesa, TX</p>
+    </div>
+  </div>
+</div>
+
+<!-- EVENTS -->
+<div id="page-events" class="page">
+  <p style="font-size:22px;font-weight:700;margin-bottom:4px;">Events</p>
+  <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:0;">Upcoming at KingdomCulture.</p>
+  <div class="card" style="overflow:hidden;">
+    <div style="cursor:pointer;" onclick="showEventDetail()">
+      <img src="https://kingdomcultureapp.github.io/event-flyer-1.jpg" style="width:100%;display:block;">
+      <div style="padding:16px;">
+        <p style="font-size:11px;color:#C9A84C;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Youth</p>
+        <p style="font-size:17px;font-weight:700;margin-bottom:4px;">SET APART - KCM YTH Summer Conference</p>
+        <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:16px;">July 6-8 · Lamesa, TX</p>
+        <a href="https://www.cognitoforms.com/Kcm1/KSYC2026" target="_blank" class="btn btn-dark" style="background:#D3121A;color:#fff;">Register Now</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT DETAIL (hidden) -->
+<div id="page-eventdetail" class="page">
+  <button onclick="showPage('events')" style="background:none;border:none;color:#C9A84C;font-size:17px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:20px;padding:0;">&#8592; Back</button>
+  <img src="https://kingdomcultureapp.github.io/event-flyer-1.jpg" style="width:100%;border-radius:12px;margin-bottom:10px;">
+  <img src="https://kingdomcultureapp.github.io/event-flyer-2.jpg" style="width:100%;border-radius:12px;margin-bottom:16px;">
+  <div class="card" style="padding:16px;">
+    <p style="font-size:11px;color:#C9A84C;font-weight:600;text-transform:uppercase;margin-bottom:4px;">Youth</p>
+    <p style="font-size:18px;font-weight:700;margin-bottom:4px;">SET APART - KCM YTH Summer Conference</p>
+    <p style="font-size:14px;color:rgba(255,255,255,0.4);margin-bottom:14px;">July 6-8 · Lamesa, TX</p>
+    <p style="font-size:14px;color:#C0C0C0;line-height:1.6;margin-bottom:16px;">A powerful 3-day Christian conference for 6th-12th graders full of fun, games, worship, God encounters, guest speakers and meeting people. Cost is $35.</p>
+    <a href="https://www.cognitoforms.com/Kcm1/KSYC2026" target="_blank" class="btn" style="background:#D3121A;color:#fff;display:block;text-align:center;text-decoration:none;padding:14px;border-radius:10px;font-weight:600;font-size:15px;">Register Now</a>
+  </div>
+</div>
+
+<!-- GIVE -->
+<div id="page-give" class="page">
+  <div style="background:#000;border-radius:16px;padding:32px 20px;text-align:center;border:1px solid rgba(201,168,76,0.2);margin-bottom:12px;">
+    <img src="https://kingdomcultureapp.github.io/wordmark.jpg" style="width:200px;display:block;margin:0 auto 20px;">
+    <p style="font-size:13px;color:rgba(255,255,255,0.4);line-height:1.6;margin-bottom:24px;">Your generosity helps us spread the gospel and serve our community.</p>
+    <a href="https://give.tithe.ly/?formId=7d3b6b12-b538-4257-b23e-98d9d83446f5" target="_blank" class="btn btn-outline">Continue to Giving &rarr;</a>
+  </div>
+  <p style="font-size:12px;color:rgba(255,255,255,0.35);text-align:center;line-height:1.6;margin-bottom:16px;">Fund selection available on the next screen through Tithe.ly.</p>
+  <div class="card" style="padding:16px;display:flex;gap:12px;align-items:flex-start;">
+    <span style="font-size:20px;">🔒</span>
+    <div>
+      <p style="font-size:13px;font-weight:600;margin-bottom:3px;">Secure Giving via Tithe.ly</p>
+      <p style="font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;">All giving is processed securely through <span style="color:#C9A84C;font-weight:600;">Tithe.ly</span>. 100% secure and tax-deductible.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PHOTOS -->
+<div id="page-photos" class="page">
+  <p style="font-size:22px;font-weight:700;margin-bottom:4px;">Photos</p>
+  <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">From our services</p>
+  <div id="photos-by-service"></div>
+</div>
+
+
+<!-- PHOTO DETAIL -->
+<div id="page-photodetail" class="page">
+  <button onclick="showPage('photos')" style="background:none;border:none;color:#C9A84C;font-size:17px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;margin-bottom:20px;padding:0;">&#8592; Back</button>
+  <img src="https://kingdomcultureapp.github.io/senior-sunday-4.jpg" style="width:100%;border-radius:12px;margin-bottom:12px;">
+  <p style="font-size:15px;font-weight:600;margin-bottom:4px;">KingdomCulture. Community</p>
+  <p style="font-size:13px;color:rgba(255,255,255,0.4);">2025</p>
+</div>
+
+<!-- COMMUNITY -->
+<div id="page-community" class="page" style="padding:0;display:none;flex-direction:column;position:fixed;top:0;left:0;right:0;bottom:60px;">
+  <!-- Header -->
+  <div style="padding:44px 16px 10px;flex-shrink:0;background:#0A0A0A;">
+    <p style="font-size:22px;font-weight:700;margin-bottom:2px;">Community</p>
+    <p style="font-size:13px;color:rgba(255,255,255,0.4);">KingdomCulture. family</p>
+  </div>
+
+  <!-- Filter tabs -->
+  <div style="display:flex;gap:8px;padding:0 16px 10px;overflow-x:auto;flex-shrink:0;background:#0A0A0A;">
+    <button class="cat-btn active" id="filter-All" onclick="filterPosts('All')">All</button>
+    <button class="cat-btn" id="filter-General" onclick="filterPosts('General')">General</button>
+    <button class="cat-btn" id="filter-Announcements" onclick="filterPosts('Announcements')">Announcements</button>
+    <button class="cat-btn" id="filter-Prayer" onclick="filterPosts('Prayer')">Prayer</button>
+  </div>
+
+  <!-- Messages -->
+  <div id="posts-container" style="flex:1;overflow-y:auto;padding:4px 16px 10px;-webkit-overflow-scrolling:touch;background:#0A0A0A;"></div>
+
+  <!-- Bottom input bar -->
+  <div style="flex-shrink:0;background:#111;border-top:1px solid rgba(255,255,255,0.08);padding:8px 12px 12px;">
+    <div style="display:flex;gap:6px;margin-bottom:12px;">
+      <button class="cat-btn active" id="cat-General" onclick="selectCat('General')" style="font-size:11px;padding:4px 10px;">General</button>
+      <button class="cat-btn" id="cat-Announcements" onclick="selectCat('Announcements')" style="font-size:11px;padding:4px 10px;">Announcements</button>
+      <button class="cat-btn" id="cat-Prayer" onclick="selectCat('Prayer')" style="font-size:11px;padding:4px 10px;">Prayer</button>
+    </div>
+    <div id="name-row" style="margin-bottom:6px;">
+      <input type="text" id="post-name" placeholder="Your name" style="margin-bottom:0;padding:8px 12px;font-size:13px;">
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <textarea id="post-msg" rows="1" placeholder="Message..." style="flex:1;margin-bottom:0;padding:10px 14px;font-size:14px;border-radius:20px;"></textarea>
+      <button onclick="submitPost()" style="width:40px;height:40px;border-radius:50%;background:#C9A84C;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MORE -->
+<div id="page-more" class="page">
+  <div style="background:#000;border-radius:16px;overflow:hidden;border:1px solid rgba(201,168,76,0.2);margin-bottom:0;">
+    <div style="padding:24px 20px;display:flex;gap:14px;align-items:center;">
+      <img src="https://kingdomcultureapp.github.io/community-photo.jpg" style="width:48px;height:48px;object-fit:contain;">
+      <div>
+        <p style="font-size:17px;font-weight:700;margin-bottom:2px;">KingdomCulture.</p>
+        <p style="font-size:13px;color:#C9A84C;">Lamesa, TX</p>
+      </div>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,0.06);"></div>
+    <div style="padding:16px 20px 20px;">
+      <p style="font-size:14px;color:rgba(255,255,255,0.45);line-height:1.6;">A bold, Spirit-led community committed to spreading the gospel, multiplying disciples, and building Kingdom culture in every sphere of life.</p>
+    </div>
+  </div>
+
+  <p class="sec">Visit Us</p>
+  <div class="card">
+    <div class="card-row" style="flex-direction:column;align-items:flex-start;">
+      <p style="font-size:15px;font-weight:600;margin-bottom:8px;">Service Times</p>
+      <p style="font-size:14px;color:#C0C0C0;margin-bottom:4px;">Sundays @ 10:00 am</p>
+      <p style="font-size:14px;color:#C0C0C0;margin-bottom:4px;">Wednesdays @ 7:00 pm</p>
+      <p style="font-size:14px;color:#C0C0C0;">OverCome Service / Soup Kitchen: every first Wednesday @ 7:00 pm</p>
+    </div>
+    <a href="https://maps.apple.com/?q=1013+N+2nd+St+Lamesa+TX" target="_blank" class="card-row" style="text-decoration:none;color:#F0F0F0;">
+      <span style="flex:1;font-size:15px;">1013 N 2nd St., Lamesa, TX</span>
+    </a>
+  </div>
+
+  <p class="sec">Follow Us</p>
+  <div class="card">
+    <a href="https://www.facebook.com/share/186MNBCFBM/?mibextid=wwXIfr" target="_blank" class="card-row" style="text-decoration:none;color:#F0F0F0;">
+      <span style="flex:1;font-size:15px;">Facebook</span>
+    </a>
+    <a href="https://www.tiktok.com/@kingdom.culture.ministry" target="_blank" class="card-row" style="text-decoration:none;color:#F0F0F0;">
+      <span style="flex:1;font-size:15px;">TikTok</span>
+    </a>
+    <a href="https://www.instagram.com/kingdomculture.ministries" target="_blank" class="card-row" style="text-decoration:none;color:#F0F0F0;">
+      <span style="flex:1;font-size:15px;">Instagram</span>
+    </a>
+  </div>
+
+  <p style="text-align:center;font-size:12px;color:rgba(255,255,255,0.3);margin-top:28px;padding-bottom:20px;">KingdomCulture. v1.0.0</p>
+</div>
+
+
+<!-- SERMONS LIBRARY -->
+<div id="page-sermons" class="page">
+  <p style="font-size:22px;font-weight:700;margin-bottom:4px;">Message Library</p>
+  <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:0;">Past services at KingdomCulture.</p>
+  <div id="sermons-list"></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#" class="active" id="nav-home" onclick="showPage('home');return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H5a1 1 0 01-1-1V9.5z M9 21V12h6v9"/></svg>
+    Home
+  </a>
+  <a href="#" id="nav-events" onclick="showPage('events');return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+    Events
+  </a>
+  <a href="#" id="nav-give" onclick="showPage('give');return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+    Give
+  </a>
+  <a href="#" id="nav-photos" onclick="showPage('photos');return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2zM12 17a4 4 0 100-8 4 4 0 000 8z"/></svg>
+    Photos
+  </a>
+  <a href="#" id="nav-community" onclick="showPage('community');return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+    Community
+  </a>
+  <a href="#" id="nav-more" onclick="showPage('more');return false;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    More
+  </a>
+</nav>
+
+<script defer>
+
+// Global state
+var allPosts = [];
+var currentFilter = "All";
+var currentCat = "General";
+var showPostForm = false;
+var db = null;
+
+var BASE = "https://kingdomcultureapp.github.io/";
+
+var servicePics = {
+  ss1: BASE+"senior-sunday-1.jpg",
+  ss2: BASE+"senior-sunday-2.jpg",
+  ss3: BASE+"senior-sunday-3.jpg",
+  ss4: BASE+"senior-sunday-4.jpg",
+  ss5: BASE+"senior-sunday-5.jpg"
+};
+
+var SERVICES = [
+  {
+    id: "senior-sunday",
+    title: "Senior Sunday",
+    date: "May 18, 2026",
+    videoUrl: "https://www.facebook.com/share/v/18YtNhncZJ/?mibextid=wwXIfr",
+    thumbKey: BASE+"senior-sunday-4.jpg",
+    photos: [
+      BASE+"senior-sunday-1.jpg",
+      BASE+"senior-sunday-2.jpg",
+      BASE+"senior-sunday-3.jpg",
+      BASE+"senior-sunday-4.jpg",
+      BASE+"senior-sunday-5.jpg"
+    ]
+  }
+];
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.style.display='none';p.classList.remove('active');});
+  document.querySelectorAll('.nav a').forEach(function(a){a.classList.remove('active');});
+  var page=document.getElementById('page-'+id);
+  var nav=document.getElementById('nav-'+id);
+  if(page){page.style.display=(id==='community'?'flex':'block');page.classList.add('active');}
+  if(nav)nav.classList.add('active');
+  if(id!=='community')window.scrollTo(0,0);
+  if(id==='sermons'){buildSermonsLibrary();}
+  if(id==='photos'){buildPhotosPage();}
+  if(id==='home'){rebuildHomeLibrary();}
+  if(id==='community'){
+    var saved=localStorage.getItem('kc_username');
+    var nameRow=document.getElementById('name-row');
+    if(saved&&nameRow){nameRow.style.display='none';document.getElementById('post-name').value=saved;}
+    renderPosts();
+  }
+}
+
+function showEventDetail(){showPage('eventdetail');}
+function showPhotoDetail(){showPage('photodetail');}
+
+function openPhotoUrl(url){
+  var overlay=document.getElementById('service-photo-overlay');
+  var img=document.getElementById('service-photo-img');
+  if(overlay&&img){img.src=url;overlay.style.display='flex';}
+}
+function openServicePhoto(key){openPhotoUrl(servicePics[key]||key);}
+function closeServicePhoto(){
+  var overlay=document.getElementById('service-photo-overlay');
+  if(overlay)overlay.style.display='none';
+}
+
+function togglePostForm(){
+  var f=document.getElementById('post-form');
+  if(!f)return;
+  f.style.display=f.style.display==='none'?'block':'none';
+  if(f.style.display==='block'){
+    var saved=localStorage.getItem('kc_username');
+    if(saved)document.getElementById('post-name').value=saved;
+  }
+}
+
+function selectCat(cat){
+  currentCat=cat;
+  document.querySelectorAll('.cat-btn[id^="cat-"]').forEach(function(b){b.classList.remove('active');});
+  var el=document.getElementById('cat-'+cat);
+  if(el)el.classList.add('active');
+}
+
+function filterPosts(f){
+  currentFilter=f;
+  document.querySelectorAll('.cat-btn[id^="filter-"]').forEach(function(b){b.classList.remove('active');});
+  var el=document.getElementById('filter-'+f);
+  if(el)el.classList.add('active');
+  renderPosts();
+}
+
+function renderPosts(){
+  var c=document.getElementById('posts-container');
+  if(!c)return;
+  var savedName=localStorage.getItem('kc_username')||'';
+  var filtered=currentFilter==='All'?allPosts:allPosts.filter(function(p){return p.category===currentFilter;});
+  if(filtered.length===0){
+    c.innerHTML='<div style="text-align:center;padding:60px 20px;"><div style="font-size:40px;margin-bottom:12px;">💬<\/div><p style="font-size:16px;font-weight:600;margin-bottom:6px;">No posts yet<\/p><p style="font-size:13px;color:rgba(255,255,255,0.4);">Be the first to post!</p><\/div>';
+    return;
+  }
+  var colors={General:'#C9A84C',Announcements:'#5B8DEF',Prayer:'#7BC67E'};
+  var ordered=filtered.slice().reverse();
+  c.innerHTML=ordered.map(function(p){
+    var isMe=savedName&&p.name===savedName;
+    var color=colors[p.category]||'#C9A84C';
+    if(isMe){
+      return '<div style="display:flex;flex-direction:column;align-items:flex-end;margin-bottom:12px;"><span style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:4px;margin-right:4px;">'+p.time+'<\/span><div style="max-width:75%;background:#C9A84C;border-radius:18px 18px 4px 18px;padding:10px 14px;"><p style="font-size:14px;color:#000;line-height:1.5;margin:0;">'+p.message+'<\/p><\/div><span style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;margin-right:4px;">'+p.name+'<\/span><\/div>';
+    } else {
+      return '<div style="display:flex;flex-direction:column;align-items:flex-start;margin-bottom:12px;"><span style="font-size:10px;color:rgba(255,255,255,0.35);margin-bottom:4px;margin-left:4px;">'+p.name+'<\/span><div style="display:flex;align-items:flex-end;gap:8px;"><div style="width:28px;height:28px;border-radius:50%;background:rgba(201,168,76,0.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#C9A84C;flex-shrink:0;">'+p.name.charAt(0).toUpperCase()+'<\/div><div style="max-width:75%;"><div style="background:#1e1e1e;border-radius:18px 18px 18px 4px;padding:10px 14px;border:1px solid rgba(255,255,255,0.08);"><p style="font-size:14px;color:#F0F0F0;line-height:1.5;margin:0;">'+p.message+'<\/p><\/div><span style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:4px;display:block;margin-left:4px;">'+p.time+' <span style="color:'+color+';">'+p.category+'<\/span><\/span><\/div><\/div><\/div>';
+    }
+  }).join('');
+  c.scrollTop=c.scrollHeight;
+}
+
+function submitPost(){
+  var nameEl=document.getElementById('post-name');
+  var msgEl=document.getElementById('post-msg');
+  var name=nameEl?nameEl.value.trim():'';
+  var msg=msgEl?msgEl.value.trim():'';
+  if(!name){alert('Please enter your name.');return;}
+  if(!msg){alert('Please enter a message.');return;}
+  localStorage.setItem('kc_username',name);
+  var now=new Date();
+  var time=now.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' '+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  var post={name:name,message:msg,category:currentCat,time:time};
+  allPosts.unshift(post);
+  renderPosts();
+  if(nameEl)nameEl.value='';
+  if(msgEl)msgEl.value='';
+  var f=document.getElementById('post-form');
+  if(f)f.style.display='none';
+  var nameRow=document.getElementById('name-row');
+  if(nameRow)nameRow.style.display='none';
+  if(db){
+    try{
+      db.collection('posts').add(Object.assign({},post,{timestamp:firebase.firestore.FieldValue.serverTimestamp()}))
+        .then(function(){console.log('Saved!');})
+        .catch(function(e){console.log('FB err:',e);});
+    }catch(e){console.log('FB unavailable');}
+  }
+}
+
+function buildSermonCard(svc, compact){
+  var card=document.createElement("div");
+  card.className="card";
+  card.style.cssText="overflow:hidden;margin-bottom:16px;";
+  var header=document.createElement("div");
+  header.style.cssText="padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:12px;";
+  var thumbImg=document.createElement("img");
+  thumbImg.src=svc.thumbKey;
+  thumbImg.style.cssText="width:42px;height:42px;border-radius:10px;object-fit:cover;flex-shrink:0;";
+  var titleDiv=document.createElement("div");
+  titleDiv.innerHTML='<p style="font-size:16px;font-weight:700;margin-bottom:2px;">'+svc.title+'<\/p><p style="font-size:12px;color:rgba(255,255,255,0.4);">'+svc.date+' · KingdomCulture.<\/p>';
+  header.appendChild(thumbImg);header.appendChild(titleDiv);card.appendChild(header);
+  var videoLink=document.createElement("a");
+  videoLink.href=svc.videoUrl;videoLink.target="_blank";
+  videoLink.style.cssText="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.07);text-decoration:none;";
+  videoLink.innerHTML='<div style="position:relative;width:80px;height:54px;border-radius:8px;overflow:hidden;flex-shrink:0;"><img src="'+svc.thumbKey+'" style="width:100%;height:100%;object-fit:cover;"><div style="position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;"><div style="width:24px;height:24px;border-radius:50%;background:rgba(201,168,76,0.9);display:flex;align-items:center;justify-content:center;"><svg width="10" height="10" viewBox="0 0 24 24" fill="#000"><path d="M5 3l14 9-14 9V3z"\/><\/svg><\/div><\/div><\/div><div><p style="font-size:14px;font-weight:600;color:#F0F0F0;margin-bottom:2px;">Watch Service<\/p><p style="font-size:11px;color:#C9A84C;">Facebook Video →<\/p><\/div>';
+  card.appendChild(videoLink);
+  var photoDiv=document.createElement("div");
+  photoDiv.style.cssText="padding:12px 16px;";
+  var photoLabel=document.createElement("p");
+  photoLabel.style.cssText="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;";
+  photoLabel.textContent="Photos from this service";
+  var photoStrip=document.createElement("div");
+  photoStrip.style.cssText="display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;";
+  var displayPhotos=compact?svc.photos.slice(0,3):svc.photos;
+  displayPhotos.forEach(function(url){
+    var thumb=document.createElement("div");
+    thumb.style.cssText="flex-shrink:0;width:90px;height:90px;border-radius:10px;overflow:hidden;cursor:pointer;";
+    thumb.onclick=(function(u){return function(){openPhotoUrl(u);};})(url);
+    var img=document.createElement("img");
+    img.src=url;img.style.cssText="width:100%;height:100%;object-fit:cover;";
+    thumb.appendChild(img);photoStrip.appendChild(thumb);
+  });
+  if(compact&&svc.photos.length>3){
+    var more=document.createElement("div");
+    more.style.cssText="flex-shrink:0;width:90px;height:90px;border-radius:10px;cursor:pointer;background:#1a1a1a;display:flex;align-items:center;justify-content:center;";
+    more.onclick=function(){showPage('sermons');};
+    more.innerHTML='<p style="font-size:13px;font-weight:600;color:#C9A84C;text-align:center;">+'+(svc.photos.length-3)+'<br>more<\/p>';
+    photoStrip.appendChild(more);
+  }
+  photoDiv.appendChild(photoLabel);photoDiv.appendChild(photoStrip);card.appendChild(photoDiv);
+  return card;
+}
+
+function buildSermonsLibrary(){
+  var container=document.getElementById('sermons-list');
+  if(!container)return;
+  container.innerHTML='';
+  SERVICES.forEach(function(svc){container.appendChild(buildSermonCard(svc,false));});
+}
+
+function buildPhotosPage(){
+  var container=document.getElementById('photos-by-service');
+  if(!container)return;
+  container.innerHTML='';
+  SERVICES.forEach(function(svc){
+    var section=document.createElement('div');
+    section.style.cssText='margin-bottom:24px;';
+    section.innerHTML='<p style="font-size:13px;font-weight:600;color:#C9A84C;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">'+svc.title+' — '+svc.date+'<\/p>';
+    var grid=document.createElement('div');
+    grid.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;';
+    svc.photos.forEach(function(url){
+      var cell=document.createElement('div');
+      cell.style.cssText='aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:pointer;';
+      cell.onclick=(function(u){return function(){openPhotoUrl(u);};})(url);
+      var img=document.createElement('img');
+      img.src=url;img.style.cssText='width:100%;height:100%;object-fit:cover;';
+      cell.appendChild(img);grid.appendChild(cell);
+    });
+    section.appendChild(grid);container.appendChild(section);
+  });
+}
+
+function rebuildHomeLibrary(){
+  var homeLib=document.getElementById('home-sermons');
+  if(!homeLib)return;
+  homeLib.innerHTML='';
+  SERVICES.slice(0,2).forEach(function(svc){homeLib.appendChild(buildSermonCard(svc,true));});
+}
+
+// Initialize Firebase when ready
+function initFirebase(){
+  if(typeof firebase==='undefined'){setTimeout(initFirebase,50);return;}
+  firebase.initializeApp({
+    apiKey:"AIzaSyB-dNvCKbA61cEAAa3SKzdlMvZKNpc36ec",
+    authDomain:"kingdomculture-4c2ba.firebaseapp.com",
+    projectId:"kingdomculture-4c2ba",
+    storageBucket:"kingdomculture-4c2ba.firebasestorage.app",
+    messagingSenderId:"922270114203",
+    appId:"1:922270114203:web:97c07c27d873134b7e013e"
+  });
+  db=firebase.firestore();
+  db.collection('posts').orderBy('timestamp','desc').onSnapshot(function(snap){
+    allPosts=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+    renderPosts();
+  });
+}
+
+// Start
+initFirebase();
+rebuildHomeLibrary();
+
+</script>
+</body>
+</html>
